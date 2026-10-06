@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Estudio Seis · Universo Drake</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --surface: #121214;
+      --raised: #1a1a1e;
+      --fg: #f4f1ea;
+      --muted: #a8a29a;
+      --subtle: #78716c;
+      --accent: #e8dcc8;
+      --accent-fg: #0a0a0b;
+      --border: color-mix(in oklab, var(--fg) 12%, transparent);
+      --ok: #8fbf9f;
+      --danger: #c46b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      background:
+        radial-gradient(900px 420px at 85% -8%, color-mix(in oklab, var(--accent) 14%, transparent), transparent 55%),
+        var(--bg);
+      color: var(--fg);
+      font-family: Outfit, system-ui, sans-serif;
+    }
+    button { cursor: pointer; font: inherit; }
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(16px);
+      background: color-mix(in oklab, var(--bg) 82%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark {
+      width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--accent);
+      display: grid; place-items: center; animation: pulse 3.6s ease-in-out infinite;
+    }
+    .nav a { color: var(--muted); text-decoration: none; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 18px; }
+    .hello { font-size: 13px; color: var(--accent); border: 1px solid var(--border); padding: 6px 12px; border-radius: 999px; }
+    .kicker { letter-spacing: .22em; text-transform: uppercase; font-size: 12px; color: var(--accent); }
+    h1 { font-family: "Cormorant Garamond", serif; font-size: clamp(42px, 7vw, 84px); line-height: .92; font-weight: 500; margin: 8px 0 16px; }
+    h1 em { font-style: italic; color: var(--accent); }
+    h2 { font-family: "Cormorant Garamond", serif; font-size: 40px; margin: 0; font-weight: 500; }
+    .lede { color: var(--muted); max-width: 58ch; line-height: 1.55; }
+    .hero, .studio, .quiz { display: grid; gap: 22px; }
+    .hero { grid-template-columns: 1.3fr .7fr; padding: 48px 0 12px; align-items: end; }
+    .studio { grid-template-columns: 340px 1fr; margin-top: 28px; }
+    .panel, .hero-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 20px; }
+    label { display: block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    input[type="text"], input[type="search"] {
+      width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--fg); padding: 0 14px; font: inherit;
+    }
+    input[type="color"] { width: 52px; height: 44px; border: 1px solid var(--border); background: var(--bg); border-radius: 12px; padding: 4px; }
+    input:focus { outline: 2px solid color-mix(in oklab, var(--accent) 45%, transparent); }
+    .row { display: flex; gap: 10px; }
+    .btn { border: 0; border-radius: 999px; height: 44px; padding: 0 16px; background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+    .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .error { color: var(--danger); min-height: 1.2em; font-size: 13px; }
+    .hint, .status { color: var(--muted); font-size: 14px; }
+    .turntable {
+      position: relative; aspect-ratio: 1; border-radius: 24px; background: var(--surface);
+      border: 1px solid var(--border); display: grid; place-items: center; overflow: hidden;
+    }
+    .turntable.over { border-color: var(--accent); }
+    .platter {
+      width: 78%; aspect-ratio: 1; border-radius: 50%;
+      background: repeating-radial-gradient(circle at 50% 50%, #151518 0 2px, #0d0d10 3px 5px);
+      display: grid; place-items: center; transition: transform .4s ease;
+    }
+    .platter.spin { animation: spin 2.8s linear infinite; }
+    .label {
+      width: 42%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--accent);
+      background: var(--raised); display: grid; place-items: center; text-align: center; font-size: 11px; text-transform: uppercase;
+    }
+    .label img { width: 100%; height: 100%; object-fit: cover; }
+    .bar { height: 4px; background: var(--raised); border-radius: 99px; overflow: hidden; margin: 12px 0; }
+    .bar > span { display: block; height: 100%; background: var(--accent); width: 0; transition: width .15s linear; }
+    .controls { display: flex; align-items: center; gap: 10px; }
+    .icon {
+      width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--fg); display: grid; place-items: center;
+    }
+    .icon.main { background: var(--accent); color: var(--accent-fg); border: 0; }
+    .icon:disabled { opacity: .4; }
+    .filters, .grid, .eras { display: grid; gap: 10px; }
+    .filters { grid-template-columns: repeat(auto-fit, minmax(110px, auto)); margin: 12px 0; }
+    .chip, .era, .track, .opt { border: 1px solid var(--border); background: var(--bg); color: var(--fg); border-radius: 12px; min-height: 44px; }
+    .chip { border-radius: 999px; padding: 0 14px; }
+    .chip.active, .era.active, .track.active { border-color: var(--accent); background: var(--raised); }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .album {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+      cursor: grab; animation: rise .45s ease both;
+    }
+    .album:hover, .album.selected { transform: translateY(-3px); border-color: var(--accent); }
+    .album img, .ph { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--raised); }
+    .album .meta { padding: 10px; }
+    .album strong { display: block; font-size: 13px; }
+    .album span { color: var(--muted); font-size: 12px; }
+    .tracks { display: grid; gap: 6px; max-height: 320px; overflow: auto; }
+    .track { display: flex; align-items: center; gap: 10px; padding: 0 12px; text-align: left; width: 100%; }
+    .num { width: 22px; color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+    .eras { grid-template-columns: repeat(4, 1fr); margin-top: 12px; }
+    .era { padding: 16px; text-align: left; transition: transform .2s ease, border-color .2s ease; }
+    .era:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .era b { color: var(--accent); font-size: 12px; letter-spacing: .12em; }
+    .era h3 { font-family: "Cormorant Garamond", serif; margin: 8px 0 6px; font-size: 24px; }
+    .era p { margin: 0; color: var(--muted); font-size: 14px; }
+    .quiz { grid-template-columns: 1.2fr .8fr; margin: 40px 0; }
+    .options { display: grid; gap: 8px; margin-top: 12px; }
+    .opt { text-align: left; padding: 0 14px; }
+    .opt.good { border-color: var(--ok); }
+    .opt.bad { border-color: var(--danger); }
+    .score { font-family: "Cormorant Garamond", serif; font-size: 64px; margin: 0; color: var(--accent); }
+    footer { border-top: 1px solid var(--border); padding: 22px 0 40px; color: var(--muted); font-size: 13px; }
+    .toast {
+      position: fixed; right: 16px; bottom: 16px; background: var(--surface);
+      border: 1px solid var(--accent); color: var(--accent); padding: 12px 14px;
+      border-radius: 14px; opacity: 0; transform: translateY(12px); transition: .3s ease; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: none; }
+    .eq { display: flex; height: 24px; align-items: end; gap: 3px; }
+    .eq i { width: 4px; background: var(--accent); border-radius: 99px; animation: eq .9s ease-in-out infinite; transform-origin: bottom; }
+    .eq i:nth-child(2) { animation-delay: .12s; } .eq i:nth-child(3) { animation-delay: .24s; } .eq i:nth-child(4) { animation-delay: .36s; }
+    .head-row { display: flex; justify-content: space-between; gap: 12px; align-items: end; margin: 36px 0 12px; flex-wrap: wrap; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes eq { 0%,100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 35%, transparent); }
+      50% { box-shadow: 0 0 0 10px transparent; }
+    }
+    @media (prefers-reduced-motion: reduce) { .platter.spin, .eq i, .mark { animation: none; } }
+    @media (max-width: 860px) {
+      .hero, .studio, .quiz, .eras { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .turntable { max-width: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <strong>Estudio Seis</strong><br />
+          <span style="color:var(--muted);font-size:13px">Toronto · Drake</span>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="#estudio">Estudio</a>
+        <a href="#discos">Discos</a>
+        <a href="#linea">Línea</a>
+        <a href="#quiz">Quiz</a>
+      </nav>
+      <div class="hello" id="hello">Invitado</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <div class="kicker">Sala interactiva</div>
+        <h1>La noche de <em>Drake</em> en el seis.</h1>
+        <p class="lede">Abre un disco, elige la pista y suena una vista previa limpia de 30 segundos (iTunes). Arrastra portadas, usa el teclado y guarda tu nombre. Este archivo se abre solo en el navegador.</p>
+      </div>
+      <form class="hero-card" id="profileForm">
+        <label for="name">Tu nombre en la sala</label>
+        <input id="name" type="text" maxlength="20" placeholder="Ej. Luna" autocomplete="nickname" />
+        <p class="error" id="nameError"></p>
+        <label for="accent">Color de acento</label>
+        <div class="row">
+          <input id="accent" type="color" value="#e8dcc8" aria-label="Elegir color" />
+          <button class="btn" type="submit" style="flex:1">Guardar sala</button>
+        </div>
+        <p class="hint" style="margin-top:8px">Se guarda aquí. Atajos: / buscar, flechas, Enter elegir disco, espacio play.</p>
+      </form>
+    </section>
+
+    <section class="studio" id="estudio">
+      <div>
+        <div class="turntable" id="turntable">
+          <div class="platter" id="platter"><div class="label" id="label">Suelta un disco</div></div>
+        </div>
+        <p class="status" id="nowPlaying" style="margin-top:12px">El tocadiscos espera un disco.</p>
+        <p id="trackName" style="font-family:'Cormorant Garamond',serif;font-size:22px;margin:4px 0 0"></p>
+        <div class="bar"><span id="progress"></span></div>
+        <div class="controls">
+          <button class="icon main" id="playBtn" type="button" disabled aria-label="Reproducir">▶</button>
+          <button class="icon" id="nextBtn" type="button" aria-label="Siguiente">⏭</button>
+          <button class="icon" id="muteBtn" type="button" aria-label="Silenciar">🔊</button>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.85" style="flex:1" aria-label="Volumen" />
+          <div class="eq" id="eq" hidden><i style="height:10px"></i><i style="height:16px"></i><i style="height:14px"></i><i style="height:18px"></i></div>
+        </div>
+        <p class="hint" id="loadHint">Vista previa oficial de 30 s. No es el disco completo.</p>
+      </div>
+      <div class="panel">
+        <div class="kicker">Tú eliges</div>
+        <h2 id="listTitle">Pistas</h2>
+        <input id="trackSearch" type="search" placeholder="Busca una canción… ej. Passionfruit" style="margin:12px 0" />
+        <div class="tracks" id="tracks"><p class="status">Abre un disco con Elegir, o escribe el nombre de una canción.</p></div>
+      </div>
+    </section>
+
+    <div class="head-row" id="discos">
+      <div><div class="kicker">iTunes Search API</div><h2>Estantería</h2></div>
+      <input id="search" type="search" placeholder="Buscar disco…" style="max-width:240px" />
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="grid"></div>
+
+    <div class="head-row" id="linea">
+      <div><div class="kicker">Recorrido</div><h2>Cuatro eras</h2></div>
+    </div>
+    <div class="eras" id="timeline"></div>
+
+    <section class="quiz" id="quiz">
+      <div class="panel">
+        <div class="kicker">Pregunta <span id="qIndex">1</span></div>
+        <h2 id="question">…</h2>
+        <div class="options" id="options"></div>
+      </div>
+      <div class="panel">
+        <div class="kicker">Mejor marca</div>
+        <p class="score" id="best">0</p>
+        <p class="status" id="quizStatus">El récord se guarda en este navegador.</p>
+        <button class="btn ghost" id="restart" type="button" style="margin-top:12px">Reiniciar quiz</button>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap">Estudio Seis. Portadas y audio vía iTunes Search API (30 s, versión limpia). No afiliado a Drake ni a OVO.</div></footer>
+  <audio id="audio" preload="none"></audio>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const ERAS = [
+      { id: "inicio", years: "2009–2011", title: "El comienzo", text: "De Degrassi al primer disco de estudio, Thank Me Later, y a Take Care." },
+      { id: "seis", years: "2013–2016", title: "El seis", text: "Nothing Was the Same y Views dejaron Toronto como escenario principal." },
+      { id: "ovo", years: "2017–2019", title: "Lista viva", text: "More Life funcionó como lista y Scorpion cruzó rap con baladas." },
+      { id: "noche", years: "2020–2024", title: "Nuevas noches", text: "De Dark Lane a For All the Dogs, el catálogo siguió moviéndose." }
+    ];
+    const CLASSICS = ["thank me later","take care","nothing was the same","if you're reading","views","more life","scorpion","care package","dark lane","honestly, nevermind","her loss","for all the dogs"];
+    const QUIZ = [
+      { q: "¿En qué ciudad creció Drake?", options: ["Toronto","Nueva York","Londres","Atlanta"], a: 0 },
+      { q: "¿Cuál es su nombre de pila?", options: ["Aubrey","Andre","Marcus","Noah"], a: 0 },
+      { q: "¿En qué año nació?", options: ["1986","1992","1979","1981"], a: 0 },
+      { q: "¿Cuál fue su primer álbum de estudio?", options: ["Thank Me Later","Views","Scorpion","Take Care"], a: 0 },
+      { q: "¿Qué disco salió en 2016?", options: ["Views","More Life","Scorpion","Take Care"], a: 0 }
+    ];
+    const BLOCKED = /sex|sexy|lover boy|single|\bep\b|habibti|maid of honour|nude|explicit/i;
+    const NAME_RE = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]{2,20}$/;
+    const $ = (id) => document.getElementById(id);
+    const state = {
+      albums: [], filter: "todos", query: "", selected: 0,
+      name: localStorage.getItem("seis-name") || "",
+      accent: localStorage.getItem("seis-accent") || "#e8dcc8",
+      album: null, tracks: [], hits: [], now: null,
+      quiz: 0, score: 0, best: Number(localStorage.getItem("seis-best") || 0), locked: false, done: false
+    };
+    const audio = $("audio");
+    audio.volume = 0.85;
+
+    function toast(msg) {
+      const el = $("toast"); el.textContent = msg; el.classList.add("show");
+      clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 1800);
+    }
+    function applyAccent(hex) {
+      document.documentElement.style.setProperty("--accent", hex);
+    }
+    function eraOf(y) { y = Number(y); return y <= 2011 ? "inicio" : y <= 2016 ? "seis" : y <= 2019 ? "ovo" : "noche"; }
+    function rank(t) { const i = CLASSICS.findIndex((c) => t.toLowerCase().includes(c)); return i === -1 ? 40 : i; }
+    function isClean(e) { return e === "cleaned" || e === "notExplicit"; }
+    function safeArt(u) { try { const x = new URL(u); return x.protocol === "https:" && x.hostname.endsWith("mzstatic.com") ? u : ""; } catch { return ""; } }
+    function safePrev(u) {
+      try {
+        const x = new URL(u);
+        return x.protocol === "https:" && (x.hostname === "audio-ssl.itunes.apple.com" || x.hostname.endsWith(".itunes.apple.com"));
+      } catch { return false; }
+    }
+    function toTrack(t) {
+      if (!isClean(t.trackExplicitness) || !t.previewUrl || !safePrev(t.previewUrl) || BLOCKED.test(t.trackName || "")) return null;
+      return { id: String(t.trackId || ""), name: t.trackName || "Pista", preview: t.previewUrl, album: t.collectionName || "", n: t.trackNumber || 0 };
+    }
+    function itunes(url) {
+      return fetch(url).then((r) => { if (!r.ok) throw new Error("api"); return r.json(); }).catch(() => jsonp(url));
+    }
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb" + Date.now();
+        const s = document.createElement("script");
+        window[cb] = (data) => { delete window[cb]; s.remove(); resolve(data); };
+        s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+        s.onerror = () => { delete window[cb]; s.remove(); reject(new Error("jsonp")); };
+        document.body.appendChild(s);
+      });
+    }
+
+    async function loadAlbums() {
+      $("grid").innerHTML = "<p class='status'>Buscando portadas…</p>";
+      try {
+        const data = await itunes("https://itunes.apple.com/search?term=drake&entity=album&attribute=artistTerm&limit=80&country=us");
+        const seen = new Set();
+        state.albums = (data.results || [])
+          .filter((r) => /^drake$/i.test(r.artistName || "") && !BLOCKED.test(r.collectionName || "") && (r.trackCount || 0) >= 7)
+          .map((r) => {
+            const year = (r.releaseDate || "").slice(0, 4);
+            return { id: String(r.collectionId), title: (r.collectionName || "").replace(/\s*\((Deluxe|Expanded).*$/i, ""), year, era: eraOf(year), art: safeArt((r.artworkUrl100 || "").replace("100x100bb", "400x400bb")), tracks: r.trackCount || 0 };
+          })
+          .filter((a) => { const k = a.title.toLowerCase(); if (!a.id || seen.has(k) || rank(a.title) >= 40) return false; seen.add(k); return true; })
+          .sort((a, b) => rank(a.title) - rank(b.title) || Number(a.year) - Number(b.year))
+          .slice(0, 12);
+      } catch { state.albums = []; toast("No se pudo cargar iTunes"); }
+      renderShelf();
+    }
+
+    function visible() {
+      const q = state.query;
+      return state.albums.filter((a) => (state.filter === "todos" || a.era === state.filter) && (!q || a.title.toLowerCase().includes(q)));
+    }
+    function renderShelf() {
+      $("filters").innerHTML = [{ id: "todos", title: "Todos" }, ...ERAS].map((f) =>
+        `<button class="chip ${state.filter === f.id ? "active" : ""}" data-filter="${f.id}" type="button">${f.title}</button>`
+      ).join("");
+      const list = visible();
+      $("grid").innerHTML = list.length ? list.map((a, i) => `
+        <article class="album ${i === state.selected ? "selected" : ""}" draggable="true" data-id="${a.id}">
+          ${a.art ? `<img src="${a.art}" alt="Portada de ${a.title}" />` : `<div class="ph"></div>`}
+          <div class="meta"><strong>${a.title}</strong><span>${a.year} · ${a.tracks} pistas</span>
+          <button class="btn" type="button" data-open="${a.id}" style="width:100%;margin-top:8px;height:40px;font-size:13px">Elegir</button></div>
+        </article>`).join("") : "<p class='status'>Ningún disco coincide.</p>";
+      $("timeline").innerHTML = ERAS.map((e) =>
+        `<button class="era ${state.filter === e.id ? "active" : ""}" data-era="${e.id}" type="button"><b>${e.years}</b><h3>${e.title}</h3><p>${e.text}</p></button>`
+      ).join("");
+      $("hello").textContent = state.name ? "Sala de " + state.name : "Invitado";
+      $("best").textContent = state.best;
+    }
+    function renderTracks() {
+      $("listTitle").textContent = state.album ? state.album.title : "Pistas";
+      const q = ($("trackSearch").value || "").trim().toLowerCase();
+      const local = state.tracks.filter((t) => !q || t.name.toLowerCase().includes(q));
+      const hits = state.hits;
+      if (!state.album && !hits.length) {
+        $("tracks").innerHTML = "<p class='status'>Abre un disco con Elegir, o escribe el nombre de una canción.</p>";
+        return;
+      }
+      let html = "";
+      if (hits.length) {
+        html += hits.map((t) => `<button class="track ${state.now && state.now.id === t.id ? "active" : ""}" data-play="${t.id}" data-src="hit" type="button"><span class="num">♪</span><span>${escapeHtml(t.name)}</span></button>`).join("");
+      }
+      html += local.map((t) => `<button class="track ${state.now && state.now.id === t.id ? "active" : ""}" data-play="${t.id}" data-src="album" type="button"><span class="num">${t.n || "–"}</span><span>${escapeHtml(t.name)}</span></button>`).join("");
+      $("tracks").innerHTML = html || "<p class='status'>No hay pistas que coincidan.</p>";
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    async function openAlbum(album) {
+      state.album = album;
+      state.now = null;
+      $("label").innerHTML = album.art ? `<img src="${album.art}" alt="" />` : escapeHtml(album.title);
+      $("nowPlaying").textContent = "Cargando pistas… elige una.";
+      audio.pause(); audio.removeAttribute("src"); $("platter").classList.remove("spin"); $("eq").hidden = true; $("playBtn").disabled = true;
+      try {
+        const data = await itunes("https://itunes.apple.com/lookup?id=" + encodeURIComponent(album.id) + "&entity=song&limit=50");
+        const seen = new Set();
+        state.tracks = (data.results || []).filter((r) => r.wrapperType === "track" || r.kind === "song").map(toTrack).filter(Boolean)
+          .filter((t) => { if (seen.has(t.id)) return false; seen.add(t.id); return true; })
+          .sort((a, b) => a.n - b.n);
+        $("nowPlaying").textContent = state.tracks.length ? state.tracks.length + " pistas. Toca la que quieras oír." : "Este disco no tiene vistas previas limpias.";
+      } catch { state.tracks = []; $("nowPlaying").textContent = "No se pudieron cargar las pistas."; }
+      renderTracks();
+    }
+
+    async function playTrack(t) {
+      if (!t) return;
+      state.now = t;
+      $("trackName").textContent = t.name;
+      $("label").innerHTML = state.album && state.album.art ? `<img src="${state.album.art}" alt="" />` : "♪";
+      audio.src = t.preview;
+      audio.volume = $("muteBtn").dataset.muted === "1" ? 0 : Number($("vol").value);
+      try {
+        await audio.play();
+        $("playBtn").disabled = false;
+        $("playBtn").textContent = "❚❚";
+        $("platter").classList.add("spin");
+        $("eq").hidden = false;
+        $("nowPlaying").textContent = "Sonando: " + t.name + " · 30 s · versión limpia";
+        toast("Pista elegida");
+      } catch { $("nowPlaying").textContent = "Pulsa reproducir para activar el sonido."; $("playBtn").disabled = false; }
+      renderTracks();
+    }
+    function findTrack(id, src) { return (src === "hit" ? state.hits : state.tracks).find((t) => t.id === id); }
+
+    $("profileForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = $("name").value.trim();
+      if (name && !NAME_RE.test(name)) { $("nameError").textContent = "Usa 2 a 20 letras, sin números."; return; }
+      $("nameError").textContent = "";
+      state.name = name;
+      state.accent = $("accent").value;
+      localStorage.setItem("seis-name", name);
+      localStorage.setItem("seis-accent", state.accent);
+      applyAccent(state.accent);
+      renderShelf();
+      toast(name ? "Listo, " + name : "Sala en modo invitado");
+    });
+    $("search").addEventListener("input", (e) => { state.query = e.target.value.trim().toLowerCase(); state.selected = 0; renderShelf(); });
+    let searchT;
+    $("trackSearch").addEventListener("input", () => {
+      renderTracks();
+      clearTimeout(searchT);
+      const q = $("trackSearch").value.trim();
+      if (q.length < 2) { state.hits = []; renderTracks(); return; }
+      searchT = setTimeout(async () => {
+        try {
+          const data = await itunes("https://itunes.apple.com/search?term=" + encodeURIComponent("drake " + q) + "&entity=song&limit=25&country=us");
+          const seen = new Set();
+          state.hits = (data.results || []).filter((r) => /^drake$/i.test(r.artistName || "") && !BLOCKED.test(r.collectionName || "")).map(toTrack).filter(Boolean)
+            .filter((t) => { if (seen.has(t.id)) return false; seen.add(t.id); return true; }).slice(0, 12);
+        } catch { state.hits = []; }
+        renderTracks();
+      }, 350);
+    });
+    document.body.addEventListener("click", (e) => {
+      const f = e.target.closest("[data-filter]");
+      const era = e.target.closest("[data-era]");
+      const open = e.target.closest("[data-open]");
+      const play = e.target.closest("[data-play]");
+      const choice = e.target.closest("[data-choice]");
+      if (f) { state.filter = f.dataset.filter; state.selected = 0; renderShelf(); }
+      if (era) { state.filter = era.dataset.era; renderShelf(); $("discos").scrollIntoView({ behavior: "smooth" }); }
+      if (open) { const a = state.albums.find((x) => x.id === open.dataset.open); if (a) openAlbum(a); }
+      if (play) playTrack(findTrack(play.dataset.play, play.dataset.src));
+      if (choice && !state.locked && !state.done) {
+        state.locked = true;
+        const i = Number(choice.dataset.choice);
+        const ok = i === QUIZ[state.quiz].a;
+        choice.classList.add(ok ? "good" : "bad");
+        if (ok) state.score += 1;
+        setTimeout(() => {
+          if (state.quiz < QUIZ.length - 1) { state.quiz += 1; state.locked = false; renderQuiz(); }
+          else {
+            state.done = true;
+            state.best = Math.max(state.best, state.score);
+            localStorage.setItem("seis-best", String(state.best));
+            $("best").textContent = state.best;
+            $("question").textContent = state.score + " de " + QUIZ.length;
+            $("options").innerHTML = "";
+            $("quizStatus").textContent = "Marca guardada en este navegador.";
+          }
+        }, 700);
+      }
+    });
+    $("playBtn").addEventListener("click", async () => {
+      if (!audio.src) return;
+      if (audio.paused) { try { await audio.play(); } catch {} } else audio.pause();
+    });
+    $("nextBtn").addEventListener("click", () => {
+      if (!state.now || !state.tracks.length) return;
+      const i = state.tracks.findIndex((t) => t.id === state.now.id);
+      playTrack(state.tracks[(i + 1) % state.tracks.length]);
+    });
+    $("muteBtn").addEventListener("click", () => {
+      const on = $("muteBtn").dataset.muted === "1";
+      $("muteBtn").dataset.muted = on ? "0" : "1";
+      $("muteBtn").textContent = on ? "🔊" : "🔇";
+      audio.volume = on ? Number($("vol").value) : 0;
+    });
+    $("vol").addEventListener("input", (e) => { $("muteBtn").dataset.muted = "0"; $("muteBtn").textContent = "🔊"; audio.volume = Number(e.target.value); });
+    audio.addEventListener("play", () => { $("playBtn").textContent = "❚❚"; $("platter").classList.add("spin"); $("eq").hidden = false; });
+    audio.addEventListener("pause", () => { $("playBtn").textContent = "▶"; $("platter").classList.remove("spin"); $("eq").hidden = true; });
+    audio.addEventListener("timeupdate", () => { $("progress").style.width = (audio.duration ? (audio.currentTime / audio.duration) * 100 : 0) + "%"; });
+    audio.addEventListener("ended", () => $("nextBtn").click());
+    const table = $("turntable");
+    document.body.addEventListener("dragstart", (e) => {
+      const card = e.target.closest(".album"); if (!card) return;
+      e.dataTransfer.setData("text/plain", card.dataset.id);
+    });
+    table.addEventListener("dragover", (e) => { e.preventDefault(); table.classList.add("over"); });
+    table.addEventListener("dragleave", () => table.classList.remove("over"));
+    table.addEventListener("drop", (e) => {
+      e.preventDefault(); table.classList.remove("over");
+      const a = state.albums.find((x) => x.id === e.dataTransfer.getData("text/plain"));
+      if (a) openAlbum(a);
+    });
+    $("restart").addEventListener("click", () => { state.quiz = 0; state.score = 0; state.done = false; state.locked = false; renderQuiz(); });
+    document.addEventListener("keydown", (e) => {
+      const typing = ["INPUT","TEXTAREA"].includes(document.activeElement.tagName);
+      if (e.key === "/" && !typing) { e.preventDefault(); $("search").focus(); }
+      if (typing) return;
+      if (e.key === " ") { e.preventDefault(); $("playBtn").click(); }
+      const list = visible();
+      if (e.key === "ArrowRight") state.selected = Math.min(list.length - 1, state.selected + 1);
+      if (e.key === "ArrowLeft") state.selected = Math.max(0, state.selected - 1);
+      if (e.key === "Enter" && list[state.selected]) openAlbum(list[state.selected]);
+      if (["ArrowRight","ArrowLeft"].includes(e.key)) renderShelf();
+    });
+    function renderQuiz() {
+      const item = QUIZ[state.quiz];
+      $("qIndex").textContent = state.quiz + 1;
+      $("question").textContent = item.q;
+      $("options").innerHTML = item.options.map((op, i) => `<button class="opt" type="button" data-choice="${i}">${op}</button>`).join("");
+    }
+    $("name").value = state.name;
+    $("accent").value = state.accent;
+    applyAccent(state.accent);
+    renderShelf();
+    renderQuiz();
+    loadAlbums();
+  </script>
+</body>
+</html>
